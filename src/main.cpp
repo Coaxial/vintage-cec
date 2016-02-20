@@ -2,6 +2,7 @@
 #include <IRremoteESP8266.h>
 #include <IRremoteInt.h>
 #include <ESP8266WiFi.h>
+#include <WebSocketsClient.h>
 
 #include "secrets.h"
 
@@ -12,8 +13,8 @@ const int ARROW_UP = 0x385d;
 const int IR_PIN = D2;
 
 IRrecv irrecv(IR_PIN);
-
 decode_results results;
+WebSocketsClient webSocket;
 
 // TODO clean variables etc
 
@@ -40,6 +41,11 @@ void connectWiFi() {
   Serial1.println(WiFi.localIP());
 }
 
+void openWS() {
+  // TODO handle failure to connect
+  webSocket.begin(target_host, 81);
+}
+
 void testHTTPGet() {
   // TODO use a websocket
   long func_start = millis();
@@ -48,7 +54,6 @@ void testHTTPGet() {
   Serial1.print("connecting to ");
   Serial1.println(target_host);
   
-  // Use WiFiClient class to create TCP connections
   long wicl_start = millis();
   WiFiClient client;
   long wicl_end = millis();
@@ -70,7 +75,6 @@ void testHTTPGet() {
   Serial1.print("Requesting URL: ");
   Serial1.println(url);
   
-  // This will send the request to the server
   long clpr_start = millis();
   client.print(String("GET ") + url + " HTTP/1.1\r\n" +
                "Host: " + target_host + "\r\n" + 
@@ -104,6 +108,7 @@ void listenForIR() {
 void setup() {
   setupDebugConsole();
   connectWiFi();
+  openWS();
   listenForIR();
 }
 
