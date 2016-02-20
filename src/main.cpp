@@ -37,21 +37,23 @@ void connectWiFi() {
   }
   // TODO handle failure to connect
 
+  Serial1.println();
   Serial1.print("WiFi connected with IP: ");
   Serial1.println(WiFi.localIP());
 }
 
 void sendCommand(WiFiClient client, const char* host) {
   delay(100); // Give the MCU some time to run WiFi and TCP tasks
-  String url = "/";
-  url += "?millisecs=";
-  url += millis();
+  String url = "/jsonrpc";
+  url += "?request=";
+  url += "{\"jsonrpc\":\"2.0\",\"method\":\"Application.SetMute\",\"params\":{\"mute\":\"toggle\"},\"id\":1}";
   
   Serial1.print("Requesting URL: ");
   Serial1.println(url);
   
   client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-               "Host: " + host + "\r\n" + 
+               "Host: " + host + "\r\n" +
+               "Content-Type: application/json" +
                "Connection: close\r\n\r\n");
   Serial1.println("success");
 }
@@ -61,8 +63,10 @@ void connectToHost(const char* host, const int port) {
   // TODO use a websocket
   Serial1.println();
   Serial1.println();
-  Serial1.print("connecting to ");
-  Serial1.println(host);
+  Serial1.print("Contacting ");
+  Serial1.print(host);
+  Serial1.print(":");
+  Serial1.println(port);
   
   delay(100); // Give the MCU some time to run WiFi and TCP tasks
   const int httpPort = port;
@@ -71,6 +75,7 @@ void connectToHost(const char* host, const int port) {
     return;
   }
 
+  // FIXME should probably use an object
   sendCommand(client, host);
 }
 
