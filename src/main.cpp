@@ -40,6 +40,12 @@ void connectWiFi() {
   Serial1.println(WiFi.localIP());
 }
 
+void openWS() {
+  // TODO handle failure to connect
+  // TODO port in config file
+  webSocket.begin(target_host, 8081);
+}
+
 void testHTTPGet() {
   // TODO use a websocket
   long func_start = millis();
