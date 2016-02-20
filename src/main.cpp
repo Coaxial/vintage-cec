@@ -41,9 +41,11 @@ void connectWiFi() {
   Serial1.println(WiFi.localIP());
 }
 
-void openWS() {
+void setupWS() {
   // TODO handle failure to connect
   // TODO port in config file
+  // TODO see https://github.com/Links2004/arduinoWebSockets/blob/master/examples/WebSocketClient/WebSocketClient.ino
+  //   for usage
   webSocket.begin(target_host, 8081);
 }
 
@@ -109,11 +111,12 @@ void listenForIR() {
 void setup() {
   setupDebugConsole();
   connectWiFi();
-  openWS();
+  setupWS();
   listenForIR();
 }
 
 void loop() {
+  webSocket.loop();
   irrecv.decode(&results);
   if (irrecv.decode(&results)) {
     if(results.decode_type == SONY) {
