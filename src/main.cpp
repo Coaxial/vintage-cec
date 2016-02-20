@@ -15,9 +15,12 @@ IRrecv irrecv(RECV_PIN);
 
 decode_results results;
 
+// TODO wifi goes in another PR
+// TODO clean variables etc
+//
 void setupDebugConsole() {
   Serial1.begin(115200);
-  Serial1.setDebugOutput(true);
+  // Serial1.setDebugOutput(true);
   Serial1.println("");
   Serial1.println("Debug console ready");
 }
@@ -34,7 +37,7 @@ void connectWiFi() {
   }
 
   Serial1.println("");
-  Serial1.print("Wifi connected with IP: ");
+  Serial1.print("WiFi connected with IP: ");
   Serial1.println(WiFi.localIP());
 }
 
