@@ -26,9 +26,9 @@ void setupDebugConsole() {
 
 void connectWiFi() {
   Serial1.print("Connecting to WiFi ");
-  Serial1.println(wlan_ssid);
+  Serial1.println(WLAN_SSID);
 
-  WiFi.begin(wlan_ssid, wlan_password);
+  WiFi.begin(WLAN_SSID, WLAN_PASSWORD);
 
   while(WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -46,7 +46,7 @@ void testHTTPGet() {
   Serial1.println();
   Serial1.println();
   Serial1.print("connecting to ");
-  Serial1.println(target_host);
+  Serial1.println(KODI_HOST);
   
   // Use WiFiClient class to create TCP connections
   long wicl_start = millis();
@@ -54,9 +54,9 @@ void testHTTPGet() {
   long wicl_end = millis();
   // Give the MCU some time to run WiFi and TCP tasks
   delay(100);
-  const int httpPort = 8000;
+  const int httpPort = KODI_PORT;
   long clco_start = millis();
-  if (!client.connect(target_host, httpPort)) {
+  if (!client.connect(KODI_HOST, httpPort)) {
     Serial1.println("connection failed");
     return;
   }
@@ -73,7 +73,7 @@ void testHTTPGet() {
   // This will send the request to the server
   long clpr_start = millis();
   client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-               "Host: " + target_host + "\r\n" + 
+               "Host: " + KODI_HOST + "\r\n" + 
                "Connection: close\r\n\r\n");
   long clpr_end = millis();
   // Give the MCU some time to run WiFi and TCP tasks
