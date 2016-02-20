@@ -5,6 +5,8 @@
 
 #include "secrets.h"
 
+#define DEBUG false
+
 const int VOL_UP = 0x490;
 const int VOL_DOWN = 0xc90;
 const int ARROW_UP = 0x385d;
@@ -12,14 +14,13 @@ const int ARROW_UP = 0x385d;
 const int IR_PIN = D2;
 
 IRrecv irrecv(IR_PIN);
-
 decode_results results;
 
 // TODO clean variables etc
 
 void setupDebugConsole() {
   Serial1.begin(115200);
-  Serial1.setDebugOutput(true);
+  Serial1.setDebugOutput(DEBUG);
   Serial1.println();
   Serial1.println("Debug console ready");
 }
@@ -40,61 +41,37 @@ void connectWiFi() {
   Serial1.println(WiFi.localIP());
 }
 
-void testHTTPGet() {
-  // TODO use a websocket
-  long func_start = millis();
-  Serial1.println();
-  Serial1.println();
-  Serial1.print("connecting to ");
-  Serial1.println(KODI_HOST);
-  
-  // Use WiFiClient class to create TCP connections
-  long wicl_start = millis();
-  WiFiClient client;
-  long wicl_end = millis();
-  // Give the MCU some time to run WiFi and TCP tasks
-  delay(100);
-  const int httpPort = KODI_PORT;
-  long clco_start = millis();
-  if (!client.connect(KODI_HOST, httpPort)) {
-    Serial1.println("connection failed");
-    return;
-  }
-  long clco_end = millis();
-  
-  // We now create a URI for the request
+void sendCommand(WiFiClient client, const char* host) {
+  delay(100); // Give the MCU some time to run WiFi and TCP tasks
   String url = "/";
-  url += "?microsecs=";
-  url += micros();
+  url += "?millisecs=";
+  url += millis();
   
   Serial1.print("Requesting URL: ");
   Serial1.println(url);
   
-  // This will send the request to the server
-  long clpr_start = millis();
   client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-               "Host: " + KODI_HOST + "\r\n" + 
+               "Host: " + host + "\r\n" + 
                "Connection: close\r\n\r\n");
-  long clpr_end = millis();
-  // Give the MCU some time to run WiFi and TCP tasks
-  delay(100);
-  long func_end = millis();
+  Serial1.println("success");
+}
 
+void connectToHost(const char* host, const int port) {
+  WiFiClient client;
+  // TODO use a websocket
   Serial1.println();
-  Serial1.println("closing connection");
-  Serial1.println("Timers: ");
-  Serial1.print("  instantiate WiFiClient: ");
-  Serial1.print(wicl_end - wicl_start);
-  Serial1.println("ms");
-  Serial1.print("  client connect: ");
-  Serial1.print(clco_end - clco_start);
-  Serial1.println("ms");
-  Serial1.print("  send request: ");
-  Serial1.print(clpr_end - clpr_start);
-  Serial1.println("ms");
-  Serial1.print("  whole function: ");
-  Serial1.print(func_end - func_start);
-  Serial1.println("ms");
+  Serial1.println();
+  Serial1.print("connecting to ");
+  Serial1.println(host);
+  
+  delay(100); // Give the MCU some time to run WiFi and TCP tasks
+  const int httpPort = port;
+  if (!client.connect(host, httpPort)) {
+    Serial1.println("connection failed");
+    return;
+  }
+
+  sendCommand(client, host);
 }
 
 void listenForIR() {
@@ -115,7 +92,7 @@ void loop() {
       switch(results.value) {
         case VOL_UP:
           Serial1.println("VOL UP");
-          testHTTPGet();
+          connectToHost(KODI_HOST, KODI_PORT);
           break;
         case ARROW_UP:
           Serial1.println("ARROW UP");
